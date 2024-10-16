@@ -1,0 +1,223 @@
+openapi: 3.0.3
+info:
+  title: OpenAPI schema for template terraform-alicloud-rds-postgresql
+components:
+  schemas:
+    variables:
+      type: object
+      properties:
+        infrastructure:
+          title: Infrastructure
+          type: object
+          description: |
+            Specify the infrastructure information for deploying.
+          default:
+            publicly_accessible: false
+          properties:
+            domain_suffix:
+              description: |
+                Specify the domain suffix of the PrivateZone. The domain suffix must be a valid DNS name.
+              title: Domain Suffix
+              type: string
+              x-walrus-ui:
+                order: 3
+            kms_key_id:
+              description: |
+                Specify the KMS key ID which to encrypt the PostgreSQL data. If not specified, the PostgreSQL data will not be encrypted.
+              title: Kms Key Id
+              type: string
+              x-walrus-ui:
+                order: 2
+            publicly_accessible:
+              default: false
+              description: |
+                Specify whether to enable public access. If enabled, the PostgreSQL service can be accessed from the public network.
+              title: Publicly Accessible
+              type: boolean
+              x-walrus-ui:
+                order: 4
+            vpc_id:
+              description: |
+                Specify the ID of the VPC where the PostgreSQL service applies. If not specified, a new VPC will be created.
+              title: Vpc Id
+              type: string
+              x-walrus-ui:
+                order: 1
+          x-walrus-ui:
+            colSpan: 12
+            group: Advanced
+            order: 2
+        architecture:
+          title: Architecture
+          type: string
+          description: |
+            Specify the deployment architecture, select from standalone or replication.
+          default: standalone
+          enum:
+          - standalone
+          - replication
+          x-walrus-ui:
+            group: Basic
+            order: 3
+        replication_readonly_replicas:
+          title: Replication Readonly Replicas
+          type: number
+          description: |
+            Specify the number of read-only replicas under the replication deployment.
+          default: 1
+          enum:
+          - 1
+          - 3
+          - 5
+          x-walrus-ui:
+            group: Basic
+            order: 4
+            showIf: architecture=replication
+        engine_version:
+          title: Engine Version
+          type: string
+          description: |
+            Specify the deployment engine version, select from https://www.alibabacloud.com/help/en/rds/developer-reference/api-rds-2014-08-15-createdbinstance.
+          default: "16.0"
+          enum:
+          - "16.0"
+          - "15.0"
+          - "14.0"
+          - "13.0"
+          x-walrus-ui:
+            group: Basic
+            order: 5
+        engine_parameters:
+          title: Engine Parameters
+          type: array
+          description: |
+            Specify the deployment engine parameters, select for https://www.alibabacloud.com/help/en/rds/developer-reference/api-rds-2014-08-15-describeparametertemplates.
+          default: []
+          items:
+            properties:
+              name:
+                title: Name
+                type: string
+                x-walrus-ui:
+                  order: 1
+              value:
+                title: Value
+                type: string
+                x-walrus-ui:
+                  order: 2
+            required:
+            - name
+            - value
+            type: object
+            x-walrus-ui:
+              colSpan: 12
+          x-walrus-ui:
+            colSpan: 12
+            group: Basic
+            hidden: true
+            order: 6
+        database:
+          title: Database
+          type: string
+          description: "Specify the database name. The database name must be 2-64
+            characters long and start with any lower letter, combined with number,
+            or symbols: - _. \nThe database name cannot be PostgreSQL forbidden keyword.\nSee
+            https://www.alibabacloud.com/help/en/rds/developer-reference/api-rds-2014-08-15-createdatabase.\n"
+          default: mydb
+          minLength: 2
+          maxLength: 64
+          x-walrus-ui:
+            group: Basic
+            order: 9
+        username:
+          title: Username
+          type: string
+          description: |
+            Specify the account username. The username must be 2-16 characters long and start with lower letter(expect `pg` prefix), combined with number, or symbol: _.
+            The username cannot be PostgreSQL forbidden keyword and postgres.
+            See https://www.alibabacloud.com/help/en/rds/developer-reference/api-rds-2014-08-15-createaccount.
+          default: rdsuser
+          minLength: 2
+          maxLength: 16
+          x-walrus-ui:
+            group: Basic
+            order: 7
+        password:
+          title: Password
+          type: string
+          description: |
+            Specify the account password. The password must be 8-32 characters long and start with any letter, number, or symbols: ! # $ % ^ & * ( ) _ + - =.
+            If not specified, it will generate a random password.
+            See https://www.alibabacloud.com/help/en/rds/developer-reference/api-rds-2014-08-15-createaccount.
+          format: password
+          writeOnly: true
+          minLength: 8
+          maxLength: 32
+          x-walrus-ui:
+            group: Basic
+            order: 8
+        resources:
+          title: Resources
+          type: object
+          description: |
+            Specify the computing resources.
+            The computing resource design of Alibaba Cloud is very complex, it also needs to consider on the storage resource, please view the specification document for more information.
+          default:
+            class: pg.n2.2c.1m
+          properties:
+            class:
+              default: pg.n2.2c.1m
+              description: "Specify the computing resources for primay instance. \nSee
+                https://www.alibabacloud.com/help/en/rds/apsaradb-rds-for-postgresql/primary-apsaradb-rds-for-postgresql-instance-types.\n"
+              title: Class
+              type: string
+              x-walrus-ui:
+                order: 1
+            readonly_class:
+              description: |
+                Specify the computing resources for readonly instance.
+                Configure this field when `architecture` is `replication`, if not specified, it will use the same value as `class`.
+                See https://www.alibabacloud.com/help/en/rds/apsaradb-rds-for-postgresql/read-only-apsaradb-rds-for-postgresql-instance-types.
+              title: Readonly Class
+              type: string
+              x-walrus-ui:
+                order: 2
+          x-walrus-ui:
+            colSpan: 12
+            group: Basic
+            order: 10
+        storage:
+          title: Storage
+          type: object
+          description: |
+            Specify the storage resources, select from local_ssd, cloud_ssd, cloud_essd, cloud_essd2 or cloud_essd3.
+            Choosing the storage resource is also related to the computing resource, please view the specification document for more information.
+          default:
+            class: cloud_essd
+            size: 20480
+          properties:
+            class:
+              default: cloud_essd
+              description: |
+                Specify the storage class. See https://registry.terraform.io/providers/aliyun/alicloud/latest/docs/resources/db_instance#db_instance_storage_type.
+              title: Class
+              type: string
+              x-walrus-ui:
+                order: 1
+            size:
+              default: 20480
+              description: |
+                Specify the storage size. Unit is megabyte.
+              minimum: 20480
+              title: Size(MiB)
+              type: number
+              x-walrus-ui:
+                order: 2
+          x-walrus-ui:
+            colSpan: 12
+            group: Basic
+            order: 11
+      x-walrus-ui:
+        groupOrder:
+        - Basic
+        - Advanced
